@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>5ive Stars – Documentazione</title>
+  <meta name="description" content="Documentazione del gruppo 5ive Stars (Gruppo 5) per il progetto di Ingegneria del Software, Università di Padova, A.A. 2026/2027.">
+  <link rel="icon" href="assets/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="wrap top-inner">
+      <img src="assets/logo.png" alt="Logo 5ive Stars" class="logo">
+      <nav>
+        <a href="#candidatura">Lettera</a>
+        <a href="#documenti">Documenti</a>
+        <a href="#verbali">Verbali</a>
+        <a href="#diari">Diari di bordo</a>
+        <a href="#gruppo">Gruppo</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="intro">
+      <h1>Documentazione del gruppo 5ive Stars</h1>
+      <p>Gruppo 5 del progetto didattico di Ingegneria del Software, Università degli Studi di Padova, A.A. 2026/2027.</p>
+    </section>
+
+    <section id="candidatura">
+      <h2>Lettera di Presentazione</h2>
+      {{LETTERE}}
+    </section>
+
+    <section id="documenti">
+      <h2>Documenti</h2>
+      <div class="cols">
+        <div>
+          <h3>Documentazione esterna</h3>
+          {{ESTERNI}}
+        </div>
+        <div>
+          <h3>Documentazione interna</h3>
+          {{INTERNI}}
+        </div>
+      </div>
+    </section>
+
+    <section id="verbali">
+      <h2>Verbali</h2>
+      <div class="cols">
+        <div>
+          <h3>Verbali esterni</h3>
+          {{VERBALI_ESTERNI}}
+        </div>
+        <div>
+          <h3>Verbali interni</h3>
+          {{VERBALI_INTERNI}}
+        </div>
+      </div>
+    </section>
+
+    <section id="diari">
+      <h2>Diari di bordo</h2>
+      {{DIARI}}
+    </section>
+
+    <section id="gruppo">
+      <h2>Il gruppo</h2>
+      <ul class="members">
+        <li>Niccolò Bassan</li>
+        <li>Sofia Bortolotto</li>
+        <li>Lorenzo Cisco</li>
+        <li>Enrico Esperti</li>
+        <li>Laura Granese</li>
+        <li>Alessandro Monni</li>
+        <li>Eric Vanzetto</li>
+      </ul>
+      <p class="contacts">
+        Email: <a href="mailto:5ive.stars.swe@gmail.com">5ive.stars.swe@gmail.com</a> ·
+        GitHub: <a href="https://github.com/5ivestars" target="_blank" rel="noopener">github.com/5ivestars</a>
+      </p>
+    </section>
+  </main>
+
+  <footer class="wrap foot">
+    5ive Stars – Gruppo 5 · Ingegneria del Software, Università degli Studi di Padova · Ultimo aggiornamento: {{AGGIORNATO}}
+  </footer>
+</body>
+</html>

@@ -25,7 +25,7 @@ docs/
 ├── sito/                            codice del sito
 │   ├── genera_sito.js               genera la pagina a partire da documenti/
 │   ├── modello.html                 modello della pagina
-│   └── assets/                      foglio di stile e logo
+│   └── assets/                      foglio di stile, font Poppins, logo (chiaro e scuro) e icona
 ├── README.md
 └── .gitignore
 ```
@@ -55,7 +55,7 @@ Regole applicate dal sito:
 - di ogni documento versionato compare solo la versione più alta (conviene comunque rimuovere dalla cartella la versione precedente);
 - un file con un nome non conforme viene pubblicato lo stesso, ma l'Action lo segnala con un avviso.
 
-Per vedere il sito in locale serve Node.js (versione 18 o successiva, nessuna dipendenza da installare): `node sito/genera_sito.js`, poi aprire `_site/index.html`.
+Per vedere il sito in locale serve Node.js (versione 18 o successiva, nessuna dipendenza da installare): `node sito/genera_sito.js`, poi aprire `_site/index.html`. Il sito non usa servizi esterni per i caratteri: Poppins è incluso in `sito/assets/fonts/`; le foto del gruppo vengono dai profili GitHub.
 
 ## Contatti
 

@@ -4,19 +4,29 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>5ive Stars – Documentazione</title>
-  <meta name="description" content="Documentazione del gruppo 5ive Stars (Gruppo 5) per il progetto di Ingegneria del Software, Università di Padova, A.A. 2026/2027.">
-  <link rel="icon" href="assets/logo.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <meta name="description" content="Documentazione del gruppo 5ive Stars (Gruppo 5) per il progetto di Ingegneria del Software, Università degli Studi di Padova, A.A. 2026/2027.">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0d1622" media="(prefers-color-scheme: dark)">
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+  <link rel="apple-touch-icon" href="assets/favicon.png">
+  <link rel="preload" href="assets/fonts/poppins-400.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/poppins-700.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
-  <header class="top">
-    <div class="wrap top-inner">
-      <img src="assets/logo.png" alt="Logo 5ive Stars" class="logo">
-      <nav>
-        <a href="#candidatura">Lettera</a>
+  <a class="salta" href="#contenuto">Vai ai documenti</a>
+
+  <header class="barra">
+    <div class="pagina barra-interno">
+      <a class="marchio" href="#inizio" aria-label="5ive Stars, inizio pagina">
+        <picture>
+          <source srcset="assets/logo-scuro.png" media="(prefers-color-scheme: dark)">
+          <img src="assets/logo.png" alt="5ive Stars" width="792" height="318">
+        </picture>
+      </a>
+      <nav aria-label="Sezioni">
+        <a href="#lettera">Lettera</a>
         <a href="#documenti">Documenti</a>
         <a href="#verbali">Verbali</a>
         <a href="#diari">Diari di bordo</a>
@@ -25,70 +35,135 @@
     </div>
   </header>
 
-  <main class="wrap">
-    <section class="intro">
-      <h1>Documentazione del gruppo 5ive Stars</h1>
-      <p>Gruppo 5 del progetto didattico di Ingegneria del Software, Università degli Studi di Padova, A.A. 2026/2027.</p>
-    </section>
-
-    <section id="candidatura">
-      <h2>Lettera di Presentazione</h2>
-      {{LETTERE}}
-    </section>
-
-    <section id="documenti">
-      <h2>Documenti</h2>
-      <div class="cols">
-        <div>
-          <h3>Documentazione esterna</h3>
-          {{ESTERNI}}
+  <main id="inizio">
+    <section class="apertura" aria-labelledby="titolo">
+      <div class="pagina apertura-interno">
+        <div class="apertura-testo">
+          <h1 id="titolo">Documentazione di progetto</h1>
+          <p class="apertura-sotto">Gruppo 5 del progetto didattico di Ingegneria del Software, Università degli Studi di Padova, A.A. 2026/2027. Qui trovi solo i documenti approvati, dal più recente.</p>
+          <div id="lettera" class="lettera-blocco">
+            {{LETTERA}}
+          </div>
+          <p class="aggiornato">Ultimo aggiornamento: <time datetime="{{AGGIORNATO}}">{{AGGIORNATO}}</time></p>
         </div>
-        <div>
-          <h3>Documentazione interna</h3>
-          {{INTERNI}}
-        </div>
+
+        <svg class="circuito" viewBox="0 0 480 360" role="img" aria-label="Piste di circuito, il motivo del logo 5ive Stars">
+          <defs>
+            <linearGradient id="pista" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="480" y2="360">
+              <stop offset="0" stop-color="#1fa8d8"/>
+              <stop offset="1" stop-color="#3fd6c6"/>
+            </linearGradient>
+            <linearGradient id="dissolvenza" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="110" y2="0">
+              <stop offset="0" stop-color="#fff" stop-opacity="0"/>
+              <stop offset="1" stop-color="#fff" stop-opacity="1"/>
+            </linearGradient>
+            <mask id="ingresso" maskUnits="userSpaceOnUse" x="0" y="-20" width="480" height="400">
+              <rect x="0" y="-20" width="480" height="400" fill="url(#dissolvenza)"/>
+            </mask>
+          </defs>
+          <g class="piste" mask="url(#ingresso)" fill="none" stroke="url(#pista)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+            <path pathLength="1" style="--i:0" d="M0 64H180L220 104H330"/>
+            <path pathLength="1" style="--i:1" d="M0 112H120L160 152H262L302 192H420"/>
+            <path pathLength="1" style="--i:2" d="M0 160H86L126 200H204"/>
+            <path pathLength="1" style="--i:3" d="M0 208H150L190 248H356L392 212V150"/>
+            <path pathLength="1" style="--i:4" d="M0 256H108L148 296H300"/>
+            <path pathLength="1" style="--i:5" d="M262 0V28L302 68H440"/>
+            <path pathLength="1" style="--i:6" d="M236 360V330L270 296H452"/>
+          </g>
+          <g class="nodi" fill="url(#pista)">
+            <g style="--i:0"><circle class="aura" cx="330" cy="104" r="17"/><circle cx="330" cy="104" r="8"/></g>
+            <g style="--i:1"><circle class="aura" cx="420" cy="192" r="17"/><circle cx="420" cy="192" r="8"/></g>
+            <g style="--i:2"><circle class="aura" cx="204" cy="200" r="17"/><circle cx="204" cy="200" r="8"/></g>
+            <g style="--i:3"><circle class="aura" cx="392" cy="150" r="17"/><circle cx="392" cy="150" r="8"/></g>
+            <g style="--i:4"><circle class="aura" cx="300" cy="296" r="17"/><circle cx="300" cy="296" r="8"/></g>
+            <g style="--i:5"><circle class="aura" cx="440" cy="68" r="17"/><circle cx="440" cy="68" r="8"/></g>
+            <g style="--i:6"><circle class="aura" cx="452" cy="296" r="17"/><circle cx="452" cy="296" r="8"/></g>
+          </g>
+        </svg>
       </div>
     </section>
 
-    <section id="verbali">
-      <h2>Verbali</h2>
-      <div class="cols">
-        <div>
-          <h3>Verbali esterni</h3>
-          {{VERBALI_ESTERNI}}
+    <div id="contenuto" class="pagina">
+      <section id="documenti" class="sezione" aria-labelledby="t-documenti">
+        <h2 id="t-documenti">Documenti</h2>
+        <div class="colonne">
+          <div>
+            <h3>Documentazione esterna</h3>
+            {{ESTERNI}}
+          </div>
+          <div>
+            <h3>Documentazione interna</h3>
+            {{INTERNI}}
+          </div>
         </div>
-        <div>
-          <h3>Verbali interni</h3>
-          {{VERBALI_INTERNI}}
+      </section>
+
+      <section id="verbali" class="sezione" aria-labelledby="t-verbali">
+        <h2 id="t-verbali">Verbali</h2>
+        <div class="colonne">
+          <div>
+            <h3>Verbali esterni</h3>
+            {{VERBALI_ESTERNI}}
+          </div>
+          <div>
+            <h3>Verbali interni</h3>
+            {{VERBALI_INTERNI}}
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section id="diari">
-      <h2>Diari di bordo</h2>
-      {{DIARI}}
-    </section>
+      <section id="diari" class="sezione" aria-labelledby="t-diari">
+        <h2 id="t-diari">Diari di bordo</h2>
+        <p class="nota">Ogni lunedì il Responsabile espone al committente difficoltà e dubbi della settimana.</p>
+        {{DIARI}}
+      </section>
 
-    <section id="gruppo">
-      <h2>Il gruppo</h2>
-      <ul class="members">
-        <li>Niccolò Bassan</li>
-        <li>Sofia Bortolotto</li>
-        <li>Lorenzo Cisco</li>
-        <li>Enrico Esperti</li>
-        <li>Laura Granese</li>
-        <li>Alessandro Monni</li>
-        <li>Eric Vanzetto</li>
-      </ul>
-      <p class="contacts">
-        Email: <a href="mailto:5ive.stars.swe@gmail.com">5ive.stars.swe@gmail.com</a> ·
-        GitHub: <a href="https://github.com/5ivestars" target="_blank" rel="noopener">github.com/5ivestars</a>
-      </p>
-    </section>
+      <section id="gruppo" class="sezione" aria-labelledby="t-gruppo">
+        <h2 id="t-gruppo">Il gruppo</h2>
+        <ul class="persone">
+          <li><a href="https://github.com/niccoloobassan" target="_blank" rel="noopener"><img src="https://github.com/niccoloobassan.png?size=112" alt="" width="56" height="56" loading="lazy"><span class="persona-nome">Niccolò Bassan</span><span class="persona-utente">@niccoloobassan</span></a></li>
+          <li><a href="https://github.com/sofiaunipd" target="_blank" rel="noopener"><img src="https://github.com/sofiaunipd.png?size=112" alt="" width="56" height="56" loading="lazy"><span class="persona-nome">Sofia Bortolotto</span><span class="persona-utente">@sofiaunipd</span></a></li>
+          <li><a href="https://github.com/lorenzocisco" target="_blank" rel="noopener"><img src="https://github.com/lorenzocisco.png?size=112" alt="" width="56" height="56" loading="lazy"><span class="persona-nome">Lorenzo Cisco</span><span class="persona-utente">@lorenzocisco</span></a></li>
+          <li><a href="https://github.com/EspertiEnrico" target="_blank" rel="noopener"><img src="https://github.com/EspertiEnrico.png?size=112" alt="" width="56" height="56" loading="lazy"><span class="persona-nome">Enrico Esperti</span><span class="persona-utente">@EspertiEnrico</span></a></li>
+          <li><a href="https://github.com/laurita-BIT" target="_blank" rel="noopener"><img src="https://github.com/laurita-BIT.png?size=112" alt="" width="56" height="56" loading="lazy"><span class="persona-nome">Laura Granese</span><span class="persona-utente">@laurita-BIT</span></a></li>
+          <li><a href="https://github.com/monniale" target="_blank" rel="noopener"><img src="https://github.com/monniale.png?size=112" alt="" width="56" height="56" loading="lazy"><span class="persona-nome">Alessandro Monni</span><span class="persona-utente">@monniale</span></a></li>
+          <li><a href="https://github.com/ericrosso" target="_blank" rel="noopener"><img src="https://github.com/ericrosso.png?size=112" alt="" width="56" height="56" loading="lazy"><span class="persona-nome">Eric Vanzetto</span><span class="persona-utente">@ericrosso</span></a></li>
+        </ul>
+        <p class="contatti">
+          Scrivici a <a href="mailto:5ive.stars.swe@gmail.com">5ive.stars.swe@gmail.com</a>
+          oppure segui il lavoro su <a href="https://github.com/5ivestars" target="_blank" rel="noopener">github.com/5ivestars</a>.
+        </p>
+      </section>
+    </div>
   </main>
 
-  <footer class="wrap foot">
-    5ive Stars – Gruppo 5 · Ingegneria del Software, Università degli Studi di Padova · Ultimo aggiornamento: {{AGGIORNATO}}
+  <footer class="piede">
+    <div class="pagina piede-interno">
+      <p>5ive Stars, Gruppo 5. Ingegneria del Software, Università degli Studi di Padova, A.A. 2026/2027.</p>
+      <p>Ultimo aggiornamento: <time datetime="{{AGGIORNATO}}">{{AGGIORNATO}}</time></p>
+    </div>
   </footer>
+
+  <script>
+    // Evidenzia nella barra la sezione che si sta leggendo. Senza JavaScript la pagina funziona lo stesso.
+    (function () {
+      var voci = document.querySelectorAll("nav a");
+      if (!("IntersectionObserver" in window) || !voci.length) return;
+      var perId = {};
+      voci.forEach(function (a) { perId[a.getAttribute("href").slice(1)] = a; });
+      var osservatore = new IntersectionObserver(function (eventi) {
+        eventi.forEach(function (e) {
+          var a = perId[e.target.id];
+          if (!a || !e.isIntersecting) return;
+          voci.forEach(function (x) { x.removeAttribute("aria-current"); });
+          a.setAttribute("aria-current", "true");
+        });
+      }, { rootMargin: "-40% 0px -55% 0px" });
+      Object.keys(perId).forEach(function (id) {
+        var s = document.getElementById(id);
+        if (s) osservatore.observe(s);
+      });
+    })();
+  </script>
 </body>
 </html>

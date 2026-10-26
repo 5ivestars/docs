@@ -1,20 +1,4 @@
 #!/usr/bin/env node
-/**
- * Genera il sito del gruppo 5ive Stars a partire dai PDF nella cartella documenti/.
- *
- * Uso: node sito/genera_sito.js   (il sito viene scritto in _site/)
- *
- * Cartelle e nomi dei file (Norme di Progetto, §3.1.8):
- *   documenti/lettere-di-presentazione/LetteraDiPresentazione_AAAA-MM-GG.pdf
- *   documenti/esterni/gestionali/NomeDocumento_vX.Y.Z.pdf
- *   documenti/esterni/tecnici/NomeDocumento_vX.Y.Z.pdf
- *   documenti/interni/NomeDocumento_vX.Y.Z.pdf
- *   documenti/verbali/esterni/VE_AAAA-MM-GG.pdf
- *   documenti/verbali/interni/VI_AAAA-MM-GG.pdf
- *   documenti/diari-di-bordo/DiarioDiBordo_AAAA-MM-GG.pdf
- * Di ogni documento versionato viene pubblicata solo la versione più alta.
- * Non servono dipendenze esterne: bastano Node.js e git.
- */
 "use strict";
 
 const fs = require("node:fs");
@@ -143,10 +127,9 @@ function documentiVersionati(cartella) {
   for (const [nome, { p, versione }] of migliori) {
     const data = dataUltimaModifica(p);
     const conVersione = versione.some((x) => x !== 0);
-    const meta = (conVersione ? `v${versione.join(".")} · ` : "") + data;
-    voci.push({ titolo: titoloDaNome(nome), file: url(p), meta, ordine: data });
+    voci.push({ titolo: titoloDaNome(nome), file: url(p), versione: conVersione ? `v${versione.join(".")}` : "", data });
   }
-  return voci.sort((a, b) => confronta(b.ordine, a.ordine) || confronta(b.titolo, a.titolo));
+  return voci.sort((a, b) => confronta(b.data, a.data) || confronta(b.titolo, a.titolo));
 }
 
 function documentiDatati(cartella, regex = RE_DATA, titolo = null) {
@@ -163,22 +146,36 @@ function documentiDatati(cartella, regex = RE_DATA, titolo = null) {
       d = m.groups.d;
       t = titolo ? titolo(m.groups) : titoloDaNome(m.groups.nome);
     }
-    voci.push({ titolo: t, file: url(p), meta: d, ordine: d });
+    voci.push({ titolo: t, file: url(p), data: d, conforme: Boolean(m) });
   }
-  return voci.sort((a, b) => confronta(b.ordine, a.ordine));
+  return voci.sort((a, b) => confronta(b.data, a.data));
 }
 
-function voce(v, classe = "doc") {
-  const t = escapeHtml(v.titolo);
+const NUOVA_SCHEDA = '<span class="solo-lettori"> (si apre in una nuova scheda)</span>';
+
+function attributiLink(v, titolo) {
+  return `href="${escapeHtml(v.file)}" target="_blank" rel="noopener" title="${escapeHtml(titolo)}"`;
+}
+
+function data(d) {
+  return `<time datetime="${escapeHtml(d)}">${escapeHtml(d)}</time>`;
+}
+
+/** Riga di un documento: nome, eventuale versione, data. */
+function voceDocumento(v) {
+  const versione = v.versione ? `<span class="doc-versione">${escapeHtml(v.versione)}</span>` : "";
   return (
-    `<a class="${classe}" href="${escapeHtml(v.file)}" target="_blank" rel="noopener" title="${t}">` +
-    `<span class="doc-name">${t}</span><span class="doc-meta">${escapeHtml(v.meta)}</span></a>`
+    `<a class="doc" ${attributiLink(v, v.titolo)}>` +
+    '<span class="doc-nodo" aria-hidden="true"></span>' +
+    `<span class="doc-nome">${escapeHtml(v.titolo)}</span>` +
+    `<span class="doc-dati">${versione}<span class="doc-data">${data(v.data)}</span></span>` +
+    `${NUOVA_SCHEDA}</a>`
   );
 }
 
 function elenco(voci, vuoto) {
-  if (!voci.length) return `<ul class="docs"><li class="empty">${vuoto}</li></ul>`;
-  return '<ul class="docs">' + voci.map((v) => `<li>${voce(v)}</li>`).join("") + "</ul>";
+  if (!voci.length) return vuoto ? `<p class="vuoto">${vuoto}</p>` : "";
+  return '<ul class="elenco">' + voci.map((v) => `<li>${voceDocumento(v)}</li>`).join("") + "</ul>";
 }
 
 /** Sottogruppo con titolo, mostrato solo se contiene documenti. */
@@ -186,10 +183,46 @@ function gruppo(titolo, voci) {
   return voci.length ? `<h4>${escapeHtml(titolo)}</h4>` + elenco(voci, "") : "";
 }
 
+/** Verbali: linea del tempo, dal più recente. */
+function lineaDelTempo(voci, etichetta, vuoto) {
+  if (!voci.length) return `<p class="vuoto">${vuoto}</p>`;
+  const righe = voci.map((v) => {
+    const nome = v.conforme ? etichetta : v.titolo;
+    return (
+      `<li><a class="evento" ${attributiLink(v, `${nome} del ${v.data}`)}>` +
+      `${data(v.data)}<span class="evento-nome">${escapeHtml(nome)}</span>${NUOVA_SCHEDA}</a></li>`
+    );
+  });
+  return '<ol class="tempo">' + righe.join("") + "</ol>";
+}
+
+/** Diari di bordo: una tappa per settimana, dalla più recente. */
+function binario(voci, vuoto) {
+  if (!voci.length) return `<p class="vuoto">${vuoto}</p>`;
+  const righe = voci.map((v) => {
+    const nome = v.conforme ? `Diario di bordo del ${v.data}` : v.titolo;
+    return (
+      `<li><a class="tappa" ${attributiLink(v, nome)}>` +
+      `<span class="solo-lettori">Diario di bordo del </span>${data(v.data)}${NUOVA_SCHEDA}</a></li>`
+    );
+  });
+  return '<ol class="binario">' + righe.join("") + "</ol>";
+}
+
+/** La Lettera di Presentazione più recente in evidenza; le precedenti in un elenco richiudibile. */
 function bloccoLettere(voci) {
-  if (!voci.length) return '<p class="empty">Nessuna lettera di presentazione pubblicata.</p>';
-  let out = voce(voci[0], "doc doc-main");
-  if (voci.length > 1) out += "<h3>Lettere precedenti</h3>" + elenco(voci.slice(1), "");
+  if (!voci.length) return '<p class="vuoto">Nessuna Lettera di Presentazione pubblicata.</p>';
+  const [ultima, ...precedenti] = voci;
+  let out =
+    `<a class="lettera" ${attributiLink(ultima, ultima.titolo)}>` +
+    `<span class="lettera-titolo">${escapeHtml(ultima.titolo)}</span>` +
+    `<span class="lettera-data">${data(ultima.data)}</span>` +
+    `<span class="lettera-azione">Apri la lettera</span>${NUOVA_SCHEDA}</a>`;
+  if (precedenti.length) {
+    out +=
+      `<details class="precedenti"><summary>Lettere precedenti (${precedenti.length})</summary>` +
+      elenco(precedenti, "") + "</details>";
+  }
   return out;
 }
 
@@ -215,14 +248,14 @@ function main() {
   const diari = documentiDatati("diari-di-bordo", RE_DATA, (g) => `Diario di bordo ${g.d}`);
 
   const sostituzioni = {
-    "{{LETTERE}}": bloccoLettere(lettere),
+    "{{LETTERA}}": bloccoLettere(lettere),
     "{{ESTERNI}}":
       gruppo("Gestionali", gestionali) + gruppo("Tecnici", tecnici) ||
-      elenco([], "Nessun documento pubblicato."),
-    "{{INTERNI}}": elenco(interni, "Nessun documento pubblicato."),
-    "{{VERBALI_ESTERNI}}": elenco(verbaliE, "Nessun verbale esterno pubblicato."),
-    "{{VERBALI_INTERNI}}": elenco(verbaliI, "Nessun verbale interno pubblicato."),
-    "{{DIARI}}": elenco(diari, "Nessun diario di bordo pubblicato."),
+      elenco([], "Nessun documento esterno pubblicato."),
+    "{{INTERNI}}": elenco(interni, "Nessun documento interno pubblicato."),
+    "{{VERBALI_ESTERNI}}": lineaDelTempo(verbaliE, "Verbale esterno", "Nessun verbale esterno pubblicato."),
+    "{{VERBALI_INTERNI}}": lineaDelTempo(verbaliI, "Verbale interno", "Nessun verbale interno pubblicato."),
+    "{{DIARI}}": binario(diari, "Nessun diario di bordo pubblicato."),
     "{{AGGIORNATO}}": fs.existsSync(DOCUMENTI) ? dataUltimaModifica(DOCUMENTI) : aaaammgg(new Date()),
   };
   let pagina = fs.readFileSync(path.join(SITO, "modello.html"), "utf8");

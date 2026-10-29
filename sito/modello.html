@@ -13,6 +13,13 @@
   <link rel="preload" href="assets/fonts/poppins-400.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="assets/fonts/poppins-700.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="assets/style.css">
+  <script>
+    // Prima che la pagina venga disegnata: le linee del tempo si animano solo con JavaScript attivo
+    // e senza l'impostazione "riduci movimento". Negli altri casi tutto è subito visibile.
+    if ("IntersectionObserver" in window && !(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches)) {
+      document.documentElement.classList.add("anima");
+    }
+  </script>
 </head>
 <body>
   <a class="salta" href="#contenuto">Vai ai documenti</a>
@@ -163,6 +170,41 @@
         var s = document.getElementById(id);
         if (s) osservatore.observe(s);
       });
+    })();
+
+    // Linee del tempo di verbali e diari, ed elenchi dei documenti: ognuno si anima quando entra
+    // nella pagina, dal documento più vecchio al più recente.
+    (function () {
+      if (!document.documentElement.classList.contains("anima")) return;
+      var elenchi = document.querySelectorAll(".tempo, .binario, .elenco");
+      elenchi.forEach(function (el) {
+        var voci = Array.prototype.slice.call(el.children);
+        var n = voci.length;
+        // con molti documenti il passo si accorcia, così l'animazione dura al massimo qualche secondo
+        var passo = Math.max(0.2, Math.min(0.45, 2.6 / Math.max(n, 1)));
+        el.style.setProperty("--passo", passo.toFixed(3) + "s");
+        if (el.classList.contains("elenco")) {
+          voci.map(function (li, i) {
+            var t = li.querySelector("time");
+            return { li: li, data: t ? t.getAttribute("datetime") : "", i: i };
+          }).sort(function (a, b) {
+            return a.data < b.data ? -1 : a.data > b.data ? 1 : b.i - a.i;
+          }).forEach(function (v, k) { v.li.style.setProperty("--k", k); });
+        } else {
+          // la pagina mostra in alto il più recente: l'ordine cronologico è quello inverso
+          voci.forEach(function (li, i) { li.style.setProperty("--k", n - 1 - i); });
+        }
+      });
+      var mostra = function (el) { el.classList.add("in-vista"); };
+      var osservatore = new IntersectionObserver(function (eventi) {
+        eventi.forEach(function (e) {
+          if (!e.isIntersecting) return;
+          mostra(e.target);
+          osservatore.unobserve(e.target);
+        });
+      }, { rootMargin: "0px 0px -10% 0px", threshold: 0.2 });
+      elenchi.forEach(function (el) { osservatore.observe(el); });
+      window.addEventListener("beforeprint", function () { elenchi.forEach(mostra); });
     })();
   </script>
 </body>

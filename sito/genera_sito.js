@@ -27,7 +27,7 @@ const TITOLI = {
 
 const RE_VERSIONE = /^(?<nome>[A-Za-z]+)_v(?<v>\d+\.\d+\.\d+)\.pdf$/;
 const RE_DATA = /^(?<nome>[A-Za-z]+)_(?<d>\d{4}-\d{2}-\d{2})\.pdf$/;
-const RE_VERBALE = /^(?<tipo>VI|VE)_(?<d>\d{4}-\d{2}-\d{2})\.pdf$/;
+const RE_VERBALE = /^(?<tipo>VI|VE)_(?<d>\d{4}-\d{2}-\d{2})(?:_(?<chi>[A-Za-z]+))?\.pdf$/;
 
 /** Segnala un problema; nelle GitHub Actions compare come avviso nel riepilogo. */
 function avviso(msg, file) {
@@ -148,7 +148,7 @@ function documentiDatati(cartella, regex = RE_DATA, titolo = null) {
     }
     voci.push({ titolo: t, file: url(p), data: d, conforme: Boolean(m) });
   }
-  return voci.sort((a, b) => confronta(b.data, a.data));
+  return voci.sort((a, b) => confronta(b.data, a.data) || confronta(b.titolo, a.titolo));
 }
 
 const NUOVA_SCHEDA = '<span class="solo-lettori"> (si apre in una nuova scheda)</span>';
@@ -184,10 +184,10 @@ function gruppo(titolo, voci) {
 }
 
 /** Verbali: linea del tempo, dal più recente. */
-function lineaDelTempo(voci, etichetta, vuoto) {
+function lineaDelTempo(voci, vuoto) {
   if (!voci.length) return `<p class="vuoto">${vuoto}</p>`;
   const righe = voci.map((v) => {
-    const nome = v.conforme ? etichetta : v.titolo;
+    const nome = v.titolo;
     return (
       `<li><a class="evento" ${attributiLink(v, `${nome} del ${v.data}`)}>` +
       `${data(v.data)}<span class="evento-nome">${escapeHtml(nome)}</span>${NUOVA_SCHEDA}</a></li>`
@@ -243,8 +243,9 @@ function main() {
   const gestionali = documentiVersionati("esterni/gestionali");
   const tecnici = documentiVersionati("esterni/tecnici");
   const interni = documentiVersionati("interni");
-  const verbaliE = documentiDatati("verbali/esterni", RE_VERBALE, (g) => `Verbale esterno ${g.d}`);
-  const verbaliI = documentiDatati("verbali/interni", RE_VERBALE, (g) => `Verbale interno ${g.d}`);
+  const verbale = (tipo) => (g) => `Verbale ${tipo}` + (g.chi ? ` con ${g.chi}` : "");
+  const verbaliE = documentiDatati("verbali/esterni", RE_VERBALE, verbale("esterno"));
+  const verbaliI = documentiDatati("verbali/interni", RE_VERBALE, verbale("interno"));
   const diari = documentiDatati("diari-di-bordo", RE_DATA, (g) => `Diario di bordo ${g.d}`);
 
   const sostituzioni = {
@@ -253,8 +254,8 @@ function main() {
       gruppo("Gestionali", gestionali) + gruppo("Tecnici", tecnici) ||
       elenco([], "Nessun documento esterno pubblicato."),
     "{{INTERNI}}": elenco(interni, "Nessun documento interno pubblicato."),
-    "{{VERBALI_ESTERNI}}": lineaDelTempo(verbaliE, "Verbale esterno", "Nessun verbale esterno pubblicato."),
-    "{{VERBALI_INTERNI}}": lineaDelTempo(verbaliI, "Verbale interno", "Nessun verbale interno pubblicato."),
+    "{{VERBALI_ESTERNI}}": lineaDelTempo(verbaliE, "Nessun verbale esterno pubblicato."),
+    "{{VERBALI_INTERNI}}": lineaDelTempo(verbaliI, "Nessun verbale interno pubblicato."),
     "{{DIARI}}": binario(diari, "Nessun diario di bordo pubblicato."),
     "{{AGGIORNATO}}": fs.existsSync(DOCUMENTI) ? dataUltimaModifica(DOCUMENTI) : aaaammgg(new Date()),
   };

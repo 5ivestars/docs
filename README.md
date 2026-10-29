@@ -38,7 +38,7 @@ La suddivisione dei documenti segue il regolamento del progetto didattico: docum
 |---|---|
 | `lettere-di-presentazione/` | `LetteraDiPresentazione_AAAA-MM-GG.pdf` |
 | `esterni/gestionali/`, `esterni/tecnici/`, `interni/` | `NomeDocumento_vX.Y.Z.pdf` |
-| `verbali/esterni/` | `VE_AAAA-MM-GG.pdf` |
+| `verbali/esterni/` | `VE_AAAA-MM-GG.pdf`; con più incontri esterni nello stesso giorno `VE_AAAA-MM-GG_Azienda.pdf` (per esempio `VE_2026-10-28_Halue.pdf`) |
 | `verbali/interni/` | `VI_AAAA-MM-GG.pdf` |
 | `diari-di-bordo/` | `DiarioDiBordo_AAAA-MM-GG.pdf` |
 

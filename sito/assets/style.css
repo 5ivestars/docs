@@ -206,6 +206,58 @@ h4 { font-size: 15px; font-weight: 500; margin: 18px 0 10px; }
 }
 .tappa:hover { background: var(--velo); }
 
+/* Animazione di linee del tempo ed elenchi.
+   Quando un elenco entra nella pagina la pista si disegna dal documento più vecchio al più recente
+   e i nodi si accendono uno alla volta; il più recente si accende con un'onda.
+   La classe "anima" la aggiunge lo script in testa alla pagina, --k (posizione cronologica)
+   e --passo li calcola lo script in fondo. */
+.anima .tempo li::before,
+.anima .binario li::after { opacity: 0; transform: scale(0.2); }
+.anima .tempo li:not(:last-child)::after { transform: scaleY(0); transform-origin: 50% 100%; }
+.anima .binario li::before { transform: scaleX(0); transform-origin: 100% 50%; }
+.anima .tempo li > a { opacity: 0; transform: translateX(-10px); }
+.anima .binario li > a,
+.anima .elenco > li { opacity: 0; transform: translateY(8px); }
+
+.anima .tempo.in-vista li::before {
+  animation: nodo 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) calc(var(--k) * var(--passo)) forwards;
+}
+.anima .tempo.in-vista li:not(:last-child)::after {
+  animation: pista-su calc(var(--passo) - 0.12s) cubic-bezier(0.45, 0, 0.55, 1) calc((var(--k) - 1) * var(--passo) + 0.12s) forwards;
+}
+.anima .tempo.in-vista li > a {
+  animation: entra 0.5s ease-out calc(var(--k) * var(--passo) + 0.06s) forwards;
+}
+.anima .binario.in-vista li::before {
+  animation: pista-sx var(--passo) cubic-bezier(0.45, 0, 0.55, 1) calc(var(--k) * var(--passo)) forwards;
+}
+.anima .binario.in-vista li::after {
+  animation: nodo 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) calc((var(--k) + 0.8) * var(--passo)) forwards;
+}
+.anima .binario.in-vista li > a {
+  animation: entra 0.5s ease-out calc((var(--k) + 0.85) * var(--passo)) forwards;
+}
+.anima .tempo.in-vista li:first-child::before {
+  animation: nodo 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) calc(var(--k) * var(--passo)) forwards,
+             onda 1.2s ease-out calc(var(--k) * var(--passo) + 0.3s) 1;
+}
+.anima .binario.in-vista li:first-child::after {
+  animation: nodo 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) calc((var(--k) + 0.8) * var(--passo)) forwards,
+             onda 1.2s ease-out calc((var(--k) + 0.8) * var(--passo) + 0.3s) 1;
+}
+.anima .elenco.in-vista > li {
+  animation: entra 0.45s ease-out calc(var(--k) * 0.12s) forwards;
+}
+@keyframes nodo { to { opacity: 1; transform: scale(1); } }
+@keyframes pista-su { to { transform: scaleY(1); } }
+@keyframes pista-sx { to { transform: scaleX(1); } }
+@keyframes entra { to { opacity: 1; transform: none; } }
+@keyframes onda {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--ciano) 55%, transparent); }
+  60% { box-shadow: 0 0 0 14px color-mix(in srgb, var(--ciano) 0%, transparent); }
+  100% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--ciano) 20%, transparent); }
+}
+
 /* Gruppo */
 .persone { list-style: none; margin: 0 0 24px; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
 .persone a {
@@ -255,4 +307,13 @@ h4 { font-size: 15px; font-weight: 500; margin: 18px 0 10px; }
   .piste path { animation: none; stroke-dashoffset: 0; }
   .nodi > g { animation: none; opacity: 1; transform: none; }
   *, *::before, *::after { transition: none !important; }
+  .anima .tempo li, .anima .tempo li::before, .anima .tempo li::after, .anima .tempo li > a,
+  .anima .binario li::before, .anima .binario li::after, .anima .binario li > a,
+  .anima .elenco > li { animation: none !important; opacity: 1 !important; transform: none !important; }
+}
+
+@media print {
+  .anima .tempo li::before, .anima .tempo li::after, .anima .tempo li > a,
+  .anima .binario li::before, .anima .binario li::after, .anima .binario li > a,
+  .anima .elenco > li { animation: none !important; opacity: 1 !important; transform: none !important; }
 }

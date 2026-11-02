@@ -14,6 +14,8 @@
   <link rel="preload" href="assets/fonts/poppins-700.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="assets/style.css">
   <script>
+    // Con JavaScript attivo, sul telefono le sezioni stanno in un menu a scomparsa; senza, restano tutte visibili.
+    document.documentElement.classList.add("js");
     // Prima che la pagina venga disegnata: le linee del tempo si animano solo con JavaScript attivo
     // e senza l'impostazione "riduci movimento". Negli altri casi tutto è subito visibile.
     if ("IntersectionObserver" in window && !(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches)) {
@@ -32,23 +34,27 @@
           <img src="assets/logo.png" alt="5ive Stars" width="792" height="318">
         </picture>
       </a>
-      <nav aria-label="Sezioni">
+      <button class="menu-bottone" type="button" aria-expanded="false" aria-controls="menu" aria-label="Apri il menu">
+        <span class="menu-icona" aria-hidden="true"><span></span><span></span><span></span></span>
+      </button>
+      <nav id="menu" aria-label="Sezioni">
         <a href="#lettera">Lettera</a>
         <a href="#documenti">Documenti</a>
         <a href="#verbali">Verbali</a>
         <a href="#diari">Diari di bordo</a>
+        {{NAV_CANDIDATURA}}
         <a href="#gruppo">Gruppo</a>
       </nav>
     </div>
   </header>
 
   <main id="inizio">
-    <section class="apertura" aria-labelledby="titolo">
+    <section id="lettera" class="apertura" aria-labelledby="titolo">
       <div class="pagina apertura-interno">
         <div class="apertura-testo">
           <h1 id="titolo">Documentazione di progetto</h1>
           <p class="apertura-sotto">Gruppo 5 del progetto didattico di Ingegneria del Software, Università degli Studi di Padova, A.A. 2026/2027. Qui trovi solo i documenti approvati, dal più recente.</p>
-          <div id="lettera" class="lettera-blocco">
+          <div class="lettera-blocco">
             {{LETTERA}}
           </div>
           <p class="aggiornato">Ultimo aggiornamento: <time datetime="{{AGGIORNATO}}">{{AGGIORNATO}}</time></p>
@@ -125,6 +131,8 @@
         {{DIARI}}
       </section>
 
+      {{CANDIDATURA}}
+
       <section id="gruppo" class="sezione" aria-labelledby="t-gruppo">
         <h2 id="t-gruppo">Il gruppo</h2>
         <ul class="persone">
@@ -152,24 +160,88 @@
   </footer>
 
   <script>
-    // Evidenzia nella barra la sezione che si sta leggendo. Senza JavaScript la pagina funziona lo stesso.
+    // Menu a scomparsa fino a 770 px di larghezza: si apre e si chiude con il pulsante, con Esc, toccando una voce
+    // o fuori dal menu. Sugli schermi larghi il pulsante non compare e le voci restano nella barra.
     (function () {
-      var voci = document.querySelectorAll("nav a");
-      if (!("IntersectionObserver" in window) || !voci.length) return;
-      var perId = {};
-      voci.forEach(function (a) { perId[a.getAttribute("href").slice(1)] = a; });
-      var osservatore = new IntersectionObserver(function (eventi) {
-        eventi.forEach(function (e) {
-          var a = perId[e.target.id];
-          if (!a || !e.isIntersecting) return;
-          voci.forEach(function (x) { x.removeAttribute("aria-current"); });
-          a.setAttribute("aria-current", "true");
-        });
-      }, { rootMargin: "-40% 0px -55% 0px" });
-      Object.keys(perId).forEach(function (id) {
-        var s = document.getElementById(id);
-        if (s) osservatore.observe(s);
+      var barra = document.querySelector(".barra");
+      var bottone = document.querySelector(".menu-bottone");
+      var menu = document.getElementById("menu");
+      if (!barra || !bottone || !menu) return;
+      function imposta(aperto) {
+        barra.classList.toggle("aperta", aperto);
+        bottone.setAttribute("aria-expanded", aperto ? "true" : "false");
+        bottone.setAttribute("aria-label", aperto ? "Chiudi il menu" : "Apri il menu");
+      }
+      bottone.addEventListener("click", function () {
+        imposta(bottone.getAttribute("aria-expanded") !== "true");
       });
+      menu.addEventListener("click", function (e) {
+        if (e.target.closest("a")) imposta(false);
+      });
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && barra.classList.contains("aperta")) {
+          imposta(false);
+          bottone.focus();
+        }
+      });
+      document.addEventListener("click", function (e) {
+        if (barra.classList.contains("aperta") && !barra.contains(e.target)) imposta(false);
+      });
+      if (window.matchMedia) {
+        var largo = window.matchMedia("(min-width: 771px)");
+        var chiudi = function (m) { if (m.matches) imposta(false); };
+        if (largo.addEventListener) largo.addEventListener("change", chiudi);
+        else if (largo.addListener) largo.addListener(chiudi);
+      }
+    })();
+
+    (function () {
+      var voci = Array.prototype.slice.call(document.querySelectorAll('nav a[href^="#"]'));
+      var sezioni = voci.map(function (a) { return document.getElementById(a.getAttribute("href").slice(1)); });
+      var barra = document.querySelector(".barra");
+      if (!voci.length) return;
+      var attiva = -1, bloccata = false, timer = null, inAttesa = false;
+      function evidenzia(i) {
+        if (i === attiva) return;
+        attiva = i;
+        voci.forEach(function (a, j) {
+          if (j === i) a.setAttribute("aria-current", "true");
+          else a.removeAttribute("aria-current");
+        });
+      }
+      function calcola() {
+        if (bloccata) return;
+        var sotto = barra ? barra.getBoundingClientRect().bottom : 0;
+        var linea = sotto + (window.innerHeight - sotto) * 0.3;
+        var i = 0;
+        sezioni.forEach(function (s, j) {
+          if (s && s.getBoundingClientRect().top <= linea) i = j;
+        });
+        var radice = document.documentElement;
+        if (window.scrollY > 0 && window.innerHeight + window.scrollY >= radice.scrollHeight - 2) {
+          i = sezioni.length - 1;
+        }
+        evidenzia(i);
+      }
+      function sblocca() {
+        clearTimeout(timer);
+        timer = setTimeout(function () { bloccata = false; }, 200);
+      }
+      voci.forEach(function (a, j) {
+        a.addEventListener("click", function () {
+          evidenzia(j);
+          bloccata = true;
+          sblocca();
+        });
+      });
+      window.addEventListener("scroll", function () {
+        if (bloccata) { sblocca(); return; }
+        if (inAttesa) return;
+        inAttesa = true;
+        window.requestAnimationFrame(function () { inAttesa = false; calcola(); });
+      }, { passive: true });
+      window.addEventListener("resize", calcola);
+      calcola();
     })();
 
     // Linee del tempo di verbali e diari, ed elenchi dei documenti: ognuno si anima quando entra

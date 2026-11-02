@@ -14,9 +14,9 @@ docs/
 ├── documenti/                       solo i PDF approvati
 │   ├── lettere-di-presentazione/    Lettere di Presentazione
 │   ├── esterni/
-│   │   ├── gestionali/              Valutazione dei capitolati, Dichiarazione degli impegni,
-│   │   │                            Piano di Progetto, Piano di Qualifica
-│   │   └── tecnici/                 Analisi dei Requisiti, Specifica Tecnica, Manuale Utente
+│   │   ├── gestionali/              Piano di Progetto, Piano di Qualifica; Valutazione dei
+│   │   │                            capitolati e Dichiarazione degli impegni (candidatura)
+│   │   └── tecnici/                 Analisi dei Requisiti, Specifica Architetturale, Manuale Utente
 │   ├── interni/                     Norme di Progetto, Glossario
 │   ├── verbali/
 │   │   ├── esterni/                 verbali con proponente e committente
@@ -52,7 +52,7 @@ Regole applicate dal sito:
 
 - in ogni sezione i documenti sono elencati dal più recente al più vecchio;
 - la Lettera di Presentazione più recente compare in cima alla pagina;
-- di ogni documento versionato compare solo la versione più alta (conviene comunque rimuovere dalla cartella la versione precedente);
+- di ogni documento versionato compare solo la versione più alta;
 - un file con un nome non conforme viene pubblicato lo stesso, ma l'Action lo segnala con un avviso.
 
 Per vedere il sito in locale serve Node.js (versione 18 o successiva, nessuna dipendenza da installare): `node sito/genera_sito.js`, poi aprire `_site/index.html`. Il sito non usa servizi esterni per i caratteri: Poppins è incluso in `sito/assets/fonts/`; le foto del gruppo vengono dai profili GitHub.

@@ -20,9 +20,18 @@ const TITOLI = {
   PianoDiQualifica: "Piano di Qualifica",
   AnalisiDeiRequisiti: "Analisi dei Requisiti",
   Glossario: "Glossario",
+  SpecificaArchitetturale: "Specifica Architetturale",
   SpecificaTecnica: "Specifica Tecnica",
   ManualeUtente: "Manuale Utente",
   DiarioDiBordo: "Diario di bordo",
+};
+
+// Documenti della candidatura del 2026-10-30. I file restano dove sono, perché la Lettera di
+// Presentazione del 2026-10-29 punta a quegli indirizzi. Quando viene pubblicata una Lettera più
+// recente (per esempio quella della RTB), la pagina li raccoglie nella sezione «Candidatura».
+const CANDIDATURA = {
+  fine: "2026-10-30",
+  documenti: new Set(["ValutazioneCapitolati", "DichiarazioneImpegni"]),
 };
 
 const RE_VERSIONE = /^(?<nome>[A-Za-z]+)_v(?<v>\d+\.\d+\.\d+)\.pdf$/;
@@ -127,7 +136,7 @@ function documentiVersionati(cartella) {
   for (const [nome, { p, versione }] of migliori) {
     const data = dataUltimaModifica(p);
     const conVersione = versione.some((x) => x !== 0);
-    voci.push({ titolo: titoloDaNome(nome), file: url(p), versione: conVersione ? `v${versione.join(".")}` : "", data });
+    voci.push({ nome, titolo: titoloDaNome(nome), file: url(p), versione: conVersione ? `v${versione.join(".")}` : "", data });
   }
   return voci.sort((a, b) => confronta(b.data, a.data) || confronta(b.titolo, a.titolo));
 }
@@ -226,6 +235,35 @@ function bloccoLettere(voci) {
   return out;
 }
 
+function separaCandidatura(lettere, gestionali) {
+  if (!lettere.length || lettere[0].data <= CANDIDATURA.fine) {
+    return { lettere, gestionali, candidatura: [] };
+  }
+  const [ultima, ...precedenti] = lettere;
+  const dellaCandidatura = (v) => CANDIDATURA.documenti.has(v.nome);
+  return {
+    lettere: [ultima, ...precedenti.filter((l) => l.data > CANDIDATURA.fine)],
+    gestionali: gestionali.filter((v) => !dellaCandidatura(v)),
+    candidatura: [
+      ...precedenti.filter((l) => l.data <= CANDIDATURA.fine),
+      ...gestionali.filter(dellaCandidatura),
+    ],
+  };
+}
+
+/** Sezione «Candidatura», mostrata solo se contiene documenti. */
+function sezioneCandidatura(voci) {
+  if (!voci.length) return "";
+  return (
+    '<section id="candidatura" class="sezione" aria-labelledby="t-candidatura">' +
+    '<h2 id="t-candidatura">Candidatura</h2>' +
+    `<p class="nota">Documenti della candidatura presentata il ${data(CANDIDATURA.fine)}. ` +
+    "Restano consultabili agli stessi indirizzi.</p>" +
+    elenco(voci, "") +
+    "</section>"
+  );
+}
+
 /** Copia ricorsiva di una cartella, saltando i file .gitkeep. */
 function copiaCartella(da, a) {
   fs.mkdirSync(a, { recursive: true });
@@ -239,8 +277,9 @@ function copiaCartella(da, a) {
 }
 
 function main() {
-  const lettere = documentiDatati("lettere-di-presentazione");
-  const gestionali = documentiVersionati("esterni/gestionali");
+  const tutteLeLettere = documentiDatati("lettere-di-presentazione");
+  const tuttiIGestionali = documentiVersionati("esterni/gestionali");
+  const { lettere, gestionali, candidatura } = separaCandidatura(tutteLeLettere, tuttiIGestionali);
   const tecnici = documentiVersionati("esterni/tecnici");
   const interni = documentiVersionati("interni");
   const verbale = (tipo) => (g) => `Verbale ${tipo}` + (g.chi ? ` con ${g.chi}` : "");
@@ -257,6 +296,8 @@ function main() {
     "{{VERBALI_ESTERNI}}": lineaDelTempo(verbaliE, "Nessun verbale esterno pubblicato."),
     "{{VERBALI_INTERNI}}": lineaDelTempo(verbaliI, "Nessun verbale interno pubblicato."),
     "{{DIARI}}": binario(diari, "Nessun diario di bordo pubblicato."),
+    "{{NAV_CANDIDATURA}}": candidatura.length ? '<a href="#candidatura">Candidatura</a>' : "",
+    "{{CANDIDATURA}}": sezioneCandidatura(candidatura),
     "{{AGGIORNATO}}": fs.existsSync(DOCUMENTI) ? dataUltimaModifica(DOCUMENTI) : aaaammgg(new Date()),
   };
   let pagina = fs.readFileSync(path.join(SITO, "modello.html"), "utf8");
@@ -270,7 +311,7 @@ function main() {
   copiaCartella(path.join(SITO, "assets"), path.join(OUT, "assets"));
   if (fs.existsSync(DOCUMENTI)) copiaCartella(DOCUMENTI, path.join(OUT, "documenti"));
 
-  const totale = [lettere, gestionali, tecnici, interni, verbaliE, verbaliI, diari]
+  const totale = [tutteLeLettere, tuttiIGestionali, tecnici, interni, verbaliE, verbaliI, diari]
     .reduce((n, l) => n + l.length, 0);
   console.log(`Sito generato in ${relativo(OUT)}/ con ${totale} documenti pubblicati.`);
 }
